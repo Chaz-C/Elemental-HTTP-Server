@@ -43,7 +43,7 @@ const server = http.createServer( (req, res) => {
   <h2>${bodyQS.elementSymbol}</h2>
   <h3>Atomic number ${bodyQS.elementAtomicNumber}</h3>
   <p>${bodyQS.elementDescription}</p>
-  <p><a href="/">back</a></p>
+  <p><a href="index.html">back</a></p>
 </body>
 </html>`;
 
@@ -54,6 +54,22 @@ const server = http.createServer( (req, res) => {
             if (err) {
               fileNotFoundErrorHandler(res);
             }
+            fs.readFile('./public/index.html', { encoding: 'utf8' },  (err, data) => {
+              if (err) {
+                fileNotFoundErrorHandler(res);
+              } else {
+                let updatedIndex = data.replace('</ol>',
+  `  <li>
+      <a href="${bodyQS.elementName.toLowerCase()}.html">${bodyQS.elementName}</a>
+    </li>
+  </ol>`);
+                fs.writeFile('./public/index.html', updatedIndex, (err) => {
+                  if (err) {
+                    fileNotFoundErrorHandler(res);
+                  }
+                });
+              }
+            });
             res.setHeader('Content-Type', 'application/json');
             res.statusCode = 200;
             res.write('{ "success" : true }');
