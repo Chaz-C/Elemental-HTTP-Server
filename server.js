@@ -17,11 +17,12 @@ const sendContent = (res, content) => {
 
 const server = http.createServer( (req, res) => {
   let theUrl = req.url.slice(1);
-  console.log('req url', theUrl);
-  console.log('req method', req.method);
-  console.log('req headers', req.headers);
+  // console.log(req.url);
+  // console.log('req url', theUrl);
+  // console.log('req method', req.method);
+  // console.log('req headers', req.headers);
 
-  if ( req.method === 'POST' ) {
+  if ( req.method === 'POST' && req.url === '/elements') {
     let reqBody = '';
     req.setEncoding('utf8');
     req.on('data', (chunk) => {
@@ -46,17 +47,26 @@ const server = http.createServer( (req, res) => {
 </body>
 </html>`;
 
-        res.setHeader('Content-Type', 'application/json');
-        res.statusCode = 200;
-        res.write('{ "success" : true }');
-        res.end();
 
-      fs.writeFile(`./public/${bodyQS.elementName.toLowerCase()}.html`, `${newHTMLFile}`, (err) => {
-        if (err) {
-          fileNotFoundErrorHandler(res);
+      fs.readdir('./public', (err, files) => {
+        if (files.indexOf(`${bodyQS.elementName.toLowerCase()}.html`) < 0 ) {
+          fs.writeFile(`./public/${bodyQS.elementName.toLowerCase()}.html`, `${newHTMLFile}`, (err) => {
+            if (err) {
+              fileNotFoundErrorHandler(res);
+            }
+            res.setHeader('Content-Type', 'application/json');
+            res.statusCode = 200;
+            res.write('{ "success" : true }');
+            res.end();
+            return;
+          });
+        } else {
+          res.statusCode = 403;
+          res.end('File already exists');
+          return;
         }
-        return;
       });
+
     });
   } else if ( theUrl === 'css/styles.css' && req.method === 'GET') {
     fs.readFile('./public/css/styles.css', (err, data) => {
