@@ -12,6 +12,7 @@ const fileNotFoundErrorHandler = (res) => {
 const sendContent = (res, content) => {
   res.write(content);
   res.end();
+  return;
 };
 
 const server = http.createServer( (req, res) => {
@@ -85,6 +86,14 @@ const server = http.createServer( (req, res) => {
         fileNotFoundErrorHandler(res);
       } else {
         res.setHeader('Content-Type', 'text/css');
+        sendContent(res, data);
+      }
+    });
+  } else if ( req.url === '/' ) {
+    fs.readFile('./public/index.html', (err, data) => {
+      if (err) {
+        fileNotFoundErrorHandler(res);
+      } else {
         sendContent(res, data);
       }
     });
